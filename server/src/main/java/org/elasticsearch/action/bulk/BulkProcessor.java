@@ -374,4 +374,9 @@ public class BulkProcessor implements Closeable {
             }
         }
     }
+
+    public void destroy(){
+        bulkRequestHandler.destroy();
+    }
+
 }

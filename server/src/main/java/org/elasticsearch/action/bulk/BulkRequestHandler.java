@@ -39,6 +39,7 @@ public final class BulkRequestHandler {
     private final Semaphore semaphore;
     private final Retry retry;
     private final int concurrentRequests;
+    private volatile boolean closed = false;
 
     BulkRequestHandler(BiConsumer<BulkRequest, ActionListener<BulkResponse>> consumer, BackoffPolicy backoffPolicy,
                        BulkProcessor.Listener listener, Scheduler scheduler, int concurrentRequests) {
@@ -57,6 +58,9 @@ public final class BulkRequestHandler {
         try {
             listener.beforeBulk(executionId, bulkRequest);
             semaphore.acquire();
+            if(closed){
+                throw new IllegalStateException("bulk request handler is closed");
+            }
             toRelease = semaphore::release;
             CountDownLatch latch = new CountDownLatch(1);
             retry.withBackoff(consumer, bulkRequest, new ActionListener<BulkResponse>() {
@@ -104,5 +108,10 @@ public final class BulkRequestHandler {
             return true;
         }
         return false;
+    }
+
+    public void destroy(){
+        closed = true;
+        semaphore.release(this.concurrentRequests);
     }
 }

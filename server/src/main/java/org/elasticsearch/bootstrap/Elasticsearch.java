@@ -43,7 +43,7 @@ import java.util.Locale;
 /**
  * This class starts elasticsearch.
  */
-class Elasticsearch extends EnvironmentAwareCommand {
+public class Elasticsearch extends EnvironmentAwareCommand {
 
     private final OptionSpecBuilder versionOption;
     private final OptionSpecBuilder daemonizeOption;
@@ -100,14 +100,14 @@ class Elasticsearch extends EnvironmentAwareCommand {
         }
         if (options.has(versionOption)) {
             final String versionOutput = String.format(
-                    Locale.ROOT,
-                    "Version: %s, Build: %s/%s/%s/%s, JVM: %s",
-                    Version.displayVersion(Version.CURRENT, Build.CURRENT.isSnapshot()),
-                    Build.CURRENT.flavor().displayName(),
-                    Build.CURRENT.type().displayName(),
-                    Build.CURRENT.shortHash(),
-                    Build.CURRENT.date(),
-                    JvmInfo.jvmInfo().version());
+                Locale.ROOT,
+                "Version: %s, Build: %s/%s/%s/%s, JVM: %s",
+                Version.displayVersion(Version.CURRENT, Build.CURRENT.isSnapshot()),
+                Build.CURRENT.flavor().displayName(),
+                Build.CURRENT.type().displayName(),
+                Build.CURRENT.shortHash(),
+                Build.CURRENT.date(),
+                JvmInfo.jvmInfo().version());
             terminal.println(versionOutput);
             return;
         }
@@ -150,7 +150,7 @@ class Elasticsearch extends EnvironmentAwareCommand {
      * NOTE: If this method is renamed and/or moved, make sure to
      * update elasticsearch-service.bat!
      */
-    static void close(String[] args) throws IOException {
+    public static void close(String[] args) throws IOException {
         Bootstrap.stop();
     }
 

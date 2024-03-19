@@ -19,9 +19,12 @@
 
 package org.elasticsearch.action.bulk;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.elasticsearch.action.Action;
 import org.elasticsearch.client.ElasticsearchClient;
 import org.elasticsearch.common.settings.Settings;
+import org.elasticsearch.common.unit.TimeValue;
 import org.elasticsearch.transport.TransportRequestOptions;
 
 public class BulkAction extends Action<BulkRequest, BulkResponse, BulkRequestBuilder> {
@@ -45,9 +48,14 @@ public class BulkAction extends Action<BulkRequest, BulkResponse, BulkRequestBui
 
     @Override
     public TransportRequestOptions transportOptions(Settings settings) {
+        final Logger logger = LogManager.getLogger(BulkAction.class);
+        TimeValue timeout = settings.getAsTime("action.bulk.timeout", TimeValue.timeValueMinutes(10));
+        logger.info("action.bulk.timeout set to [{}]",timeout);
         return TransportRequestOptions.builder()
-                .withType(TransportRequestOptions.Type.BULK)
-                .withCompress(settings.getAsBoolean("action.bulk.compress", true)
-                ).build();
+            .withType(TransportRequestOptions.Type.BULK)
+            .withTimeout(timeout)
+            .withCompress(settings.getAsBoolean("action.bulk.compress", true)
+
+            ).build();
     }
 }

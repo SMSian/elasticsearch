@@ -111,9 +111,9 @@ final class Bootstrap {
         // mlockall if requested
         if (mlockAll) {
             if (Constants.WINDOWS) {
-               Natives.tryVirtualLock();
+                Natives.tryVirtualLock();
             } else {
-               Natives.tryMlockall();
+                Natives.tryMlockall();
             }
         }
 
@@ -168,10 +168,10 @@ final class Bootstrap {
         }
 
         initializeNatives(
-                environment.tmpFile(),
-                BootstrapSettings.MEMORY_LOCK_SETTING.get(settings),
-                BootstrapSettings.SYSTEM_CALL_FILTER_SETTING.get(settings),
-                BootstrapSettings.CTRLHANDLER_SETTING.get(settings));
+            environment.tmpFile(),
+            BootstrapSettings.MEMORY_LOCK_SETTING.get(settings),
+            BootstrapSettings.SYSTEM_CALL_FILTER_SETTING.get(settings),
+            BootstrapSettings.CTRLHANDLER_SETTING.get(settings));
 
         // initialize probes before the security manager is installed
         initializeProbes();
@@ -202,11 +202,16 @@ final class Bootstrap {
         // Log ifconfig output before SecurityManager is installed
         IfConfig.logIfNecessary();
 
-        // install SM after natives, shutdown hooks, etc.
-        try {
-            Security.configure(environment, BootstrapSettings.SECURITY_FILTER_BAD_DEFAULTS_SETTING.get(settings));
-        } catch (IOException | NoSuchAlgorithmException e) {
-            throw new BootstrapException(e);
+        boolean installSM = BootstrapSettings.INSTALL_SM_SETTING.get(settings);
+        if(installSM) {
+            // install SM after natives, shutdown hooks, etc.
+            try {
+                final Logger logger = LogManager.getLogger(Bootstrap.class);
+                logger.info("installing SM since [{}] is set to true", BootstrapSettings.INSTALL_SM_SETTING.getKey());
+                Security.configure(environment, BootstrapSettings.SECURITY_FILTER_BAD_DEFAULTS_SETTING.get(settings));
+            } catch (IOException | NoSuchAlgorithmException e) {
+                throw new BootstrapException(e);
+            }
         }
 
         node = new Node(environment) {
@@ -248,11 +253,11 @@ final class Bootstrap {
     }
 
     private static Environment createEnvironment(
-            final boolean foreground,
-            final Path pidFile,
-            final SecureSettings secureSettings,
-            final Settings initialSettings,
-            final Path configPath) {
+        final boolean foreground,
+        final Path pidFile,
+        final SecureSettings secureSettings,
+        final Settings initialSettings,
+        final Path configPath) {
         Terminal terminal = foreground ? Terminal.DEFAULT : null;
         Settings.Builder builder = Settings.builder();
         if (pidFile != null) {
@@ -282,10 +287,10 @@ final class Bootstrap {
      * This method is invoked by {@link Elasticsearch#main(String[])} to startup elasticsearch.
      */
     static void init(
-            final boolean foreground,
-            final Path pidFile,
-            final boolean quiet,
-            final Environment initialEnv) throws BootstrapException, NodeValidationException, UserException {
+        final boolean foreground,
+        final Path pidFile,
+        final boolean quiet,
+        final Environment initialEnv) throws BootstrapException, NodeValidationException, UserException {
         // force the class initializer for BootstrapInfo to run before
         // the security manager is installed
         BootstrapInfo.init();
