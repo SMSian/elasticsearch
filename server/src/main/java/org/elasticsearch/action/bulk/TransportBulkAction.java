@@ -358,8 +358,7 @@ public class TransportBulkAction extends HandledTransportAction<BulkRequest, Bul
                 if (request == null) {
                     continue;
                 }
-                String concreteIndex = concreteIndices.getConcreteIndex(request.index()).getName();
-                ShardId shardId = clusterService.operationRouting().indexShards(clusterState, concreteIndex, request.id(), request.routing()).shardId();
+                ShardId shardId = new ShardId(concreteIndices.getConcreteIndex(request.index()), 0);
                 List<BulkItemRequest> shardRequests = requestsByShard.computeIfAbsent(shardId, shard -> new ArrayList<>());
                 shardRequests.add(new BulkItemRequest(i, request));
             }
